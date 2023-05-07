@@ -2,7 +2,6 @@ package util
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"os"
 )
@@ -39,8 +38,6 @@ func LoadCfg(filename string) (*Cfg, error) {
 
 	cfg := &Cfg{}
 	json.Unmarshal([]byte(byteData), cfg)
-
-	fmt.Println(cfg)
 
 	return cfg, nil
 }

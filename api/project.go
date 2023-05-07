@@ -7,17 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-type Project struct {
-	Id           primitive.ObjectID `json:"id" bson:"_id"`
-	Title        string             `json:"title" bson:"title"`
-	ExternalLink string             `json:"external_link" bson:"external_link"`
-	Tags         []string           `json:"tags" bson:"tags"`
-	HeaderId     primitive.ObjectID `json:"header_id" bson"header_id"`
-	Content      []byte             `json:"content" bson:"content"`
-}
 
 func (dbSrv *DBServer) GetAllProjects(c *gin.Context) {
 	coll := dbSrv.DB.Collection("projects")
@@ -26,7 +16,7 @@ func (dbSrv *DBServer) GetAllProjects(c *gin.Context) {
 		c.AbortWithError(http.StatusFailedDependency, errors.New("failed to retrieve projects"))
 	}
 
-	var projects []Project
+	var projects []LiteArtifact
 	err = cursor.All(context.Background(), &projects)
 	if err != nil {
 		c.AbortWithError(http.StatusFailedDependency, errors.New("failed to decode projects"))
@@ -45,14 +35,15 @@ func (dbSrv *DBServer) GetProjectsByTitle(c *gin.Context) {
 		c.AbortWithError(http.StatusFailedDependency, errors.New("failed to retrieve projects"))
 	}
 
-	var projects []Project
+	var projects []Artifact
 	err = cursor.All(context.Background(), &projects)
 	if err != nil {
 		c.AbortWithError(http.StatusFailedDependency, errors.New("failed to decode projects"))
 	}
 
 	if projects == nil {
-		projects = make([]Project, 0)
+		projects = make([]Artifact, 0)
 	}
+
 	c.JSON(http.StatusOK, projects)
 }

@@ -67,12 +67,11 @@ func New(cfg util.Cfg) (*gin.Engine, error) {
 	}
 
 	rtr := gin.Default()
-	projG := rtr.Group("/projects")
-	{
-		projG.GET("", dbSrv.GetAllProjects)
-		projG.GET("/:title", dbSrv.GetProjectsByTitle)
-	}
 	rtr.GET("/media/:id", dbSrv.GetMediaById)
+	rtr.GET("/projects", dbSrv.GetAllProjects)
+	rtr.GET("/projects/:title", dbSrv.GetProjectsByTitle)
+	rtr.GET("/posts", dbSrv.GetAllPosts)
+	rtr.GET("/posts/:title", dbSrv.GetPostsByTitle)
 
 	return rtr, nil
 }
