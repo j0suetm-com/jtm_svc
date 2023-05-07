@@ -43,7 +43,8 @@ func connectToMongoDB(cfg *util.DBCfg) (*DBServer, error) {
 	logrus.Info("Connected to mongodb")
 
 	db := client.Database("jtm_svc_db")
-	bucket, err := gridfs.NewBucket(db)
+	bucketOptions := options.GridFSBucket().SetName("media")
+	bucket, err := gridfs.NewBucket(db, bucketOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -60,14 +61,18 @@ func New(cfg util.Cfg) (*gin.Engine, error) {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	fmt.Println(cfg)
-
-	_, err := connectToMongoDB(&cfg.DB)
+	dbSrv, err := connectToMongoDB(&cfg.DB)
 	if err != nil {
 		return nil, err
 	}
 
 	rtr := gin.Default()
+	projG := rtr.Group("/projects")
+	{
+		projG.GET("", dbSrv.GetAllProjects)
+		projG.GET("/:title", dbSrv.GetProjectsByTitle)
+	}
+	rtr.GET("/media/:id", dbSrv.GetMediaById)
 
 	return rtr, nil
 }

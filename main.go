@@ -16,7 +16,6 @@ func main() {
 	rtr, err := api.New(*cfg)
 	if err != nil {
 		logrus.Error(err)
-
 	}
 
 	rtr.Run(":" + cfg.Server.Port)
