@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/j0suetm-com/jtm_svc/util"
+	"github.com/j0suetm-com/jtm_svc/middleware"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/event"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -20,15 +21,19 @@ type DBServer struct {
 	Bucket *gridfs.Bucket
 }
 
-func connectToMongoDB(cfg *util.DBCfg) (*DBServer, error) {
-	cmdMonitor := &event.CommandMonitor{
-		Started: func(_ context.Context, evt *event.CommandStartedEvent) {
-			logrus.Info("mongodb -- ", evt.Command.String())
-		},
-	}
-
+func connectToMongoDB(cfg *util.DBCfg, env string) (*DBServer, error) {
 	uri := fmt.Sprintf("mongodb://%s:%s@%s:%s/?&authSource=admin", cfg.User, cfg.Password, cfg.Host, cfg.Port)
-	clientOptions := options.Client().ApplyURI(uri).SetMonitor(cmdMonitor)
+	clientOptions := options.Client().ApplyURI(uri)
+
+	if env != "prod" {
+		cmdMonitor := &event.CommandMonitor{
+			Started: func(_ context.Context, evt *event.CommandStartedEvent) {
+				logrus.Info("mongodb -- ", evt.Command.String())
+			},
+		}
+
+		clientOptions = clientOptions.SetMonitor(cmdMonitor)
+	}
 
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
@@ -57,16 +62,17 @@ func connectToMongoDB(cfg *util.DBCfg) (*DBServer, error) {
 }
 
 func New(cfg util.Cfg) (*gin.Engine, error) {
-	if cfg.Server.Env == "prod" {
-		gin.SetMode(gin.ReleaseMode)
-	}
-
-	dbSrv, err := connectToMongoDB(&cfg.DB)
+	dbSrv, err := connectToMongoDB(&cfg.DB, cfg.Server.Env)
 	if err != nil {
 		return nil, err
 	}
 
+	if cfg.Server.Env == "prod" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	rtr := gin.Default()
+	rtr.Use(middleware.CORS)
 	rtr.GET("/media/:id", dbSrv.GetMediaById)
 	rtr.GET("/projects", dbSrv.GetAllProjects)
 	rtr.GET("/projects/:title", dbSrv.GetProjectsByTitle)

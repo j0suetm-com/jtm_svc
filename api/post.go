@@ -43,5 +43,9 @@ func (dbSrv *DBServer) GetPostsByTitle(c *gin.Context) {
 		c.AbortWithError(http.StatusFailedDependency, errors.New("failed to decode posts"))
 	}
 
+	if posts == nil {
+		posts = make([]Artifact, 0)
+	}
+
 	c.JSON(http.StatusOK, posts)
 }
