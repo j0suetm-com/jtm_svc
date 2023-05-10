@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v2
         
       - name: Create env secrets
-        run: echo {{ secrets.JTM_SVC_CONFIG }} > config.json
+        run: echo ${{ secrets.JTM_SVC_CONFIG }} > config.json
         
       - name: Build container image
         run: docker build -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
