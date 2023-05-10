@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/j0suetm-com/jtm_svc/util"
@@ -21,8 +22,8 @@ type DBServer struct {
 }
 
 func connectToMongoDB(cfg *util.DBCfg, env string) (*DBServer, error) {
-	uri := fmt.Sprintf("mongodb://%s:%s@%s:%s/?&authSource=admin", cfg.User, cfg.Password, cfg.Host, cfg.Port)
-	clientOptions := options.Client().ApplyURI(uri)
+	uri := fmt.Sprintf("mongodb://%s:%s@%s:%s/?authSource=admin", cfg.User, cfg.Password, cfg.Host, cfg.Port)
+	clientOptions := options.Client().ApplyURI(uri).SetTimeout(5 * time.Second)
 
 	if env != "prod" {
 		cmdMonitor := &event.CommandMonitor{
