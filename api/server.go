@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/j0suetm-com/jtm_svc/util"
-	"github.com/j0suetm-com/jtm_svc/middleware"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/event"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -61,6 +60,15 @@ func connectToMongoDB(cfg *util.DBCfg, env string) (*DBServer, error) {
 	}, nil
 }
 
+func CORSMiddleware(c *gin.Context) {
+  c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+  c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+  c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+  c.Writer.Header().Set("Access-Control-Allow-Methods", "GET")
+
+  c.Next()
+}
+
 func New(cfg util.Cfg) (*gin.Engine, error) {
 	dbSrv, err := connectToMongoDB(&cfg.DB, cfg.Server.Env)
 	if err != nil {
@@ -72,7 +80,7 @@ func New(cfg util.Cfg) (*gin.Engine, error) {
 	}
 
 	rtr := gin.Default()
-	rtr.Use(middleware.CORS)
+	rtr.Use(CORSMiddleware)
 	rtr.GET("/media/:id", dbSrv.GetMediaById)
 	rtr.GET("/projects", dbSrv.GetAllProjects)
 	rtr.GET("/projects/:title", dbSrv.GetProjectsByTitle)
