@@ -78,6 +78,7 @@ func New(cfg util.Cfg) (*gin.Engine, error) {
 	rtr.GET("/projects/:title", dbSrv.GetProjectsByTitle)
 	rtr.GET("/posts", dbSrv.GetAllPosts)
 	rtr.GET("/posts/:title", dbSrv.GetPostsByTitle)
+	rtr.GET("/posts/recent", dbSrv.GetRecentPost)
 
 	return rtr, nil
 }
