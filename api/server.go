@@ -22,7 +22,8 @@ type DBServer struct {
 }
 
 func connectToMongoDB(cfg *util.DBCfg, env string) (*DBServer, error) {
-	uri := fmt.Sprintf("mongodb://%s:%s@%s:%s/?authSource=admin", cfg.User, cfg.Password, cfg.Host, cfg.Port)
+	uri := fmt.Sprintf("mongodb://%s:%s@%s:%s/?authSource=admin",
+		cfg.User, cfg.Password, cfg.Host, cfg.Port)
 	clientOptions := options.Client().ApplyURI(uri).SetTimeout(5 * time.Second)
 
 	if env != "prod" {
@@ -62,12 +63,12 @@ func connectToMongoDB(cfg *util.DBCfg, env string) (*DBServer, error) {
 }
 
 func CORSMiddleware(c *gin.Context) {
-  c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-  c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-  c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-  c.Writer.Header().Set("Access-Control-Allow-Methods", "GET")
+	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+	c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+	c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+	c.Writer.Header().Set("Access-Control-Allow-Methods", "GET")
 
-  c.Next()
+	c.Next()
 }
 
 func New(cfg util.Cfg) (*gin.Engine, error) {
