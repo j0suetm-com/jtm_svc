@@ -24,7 +24,7 @@ type DBServer struct {
 func connectToMongoDB(cfg *util.DBCfg, env string) (*DBServer, error) {
 	uri := fmt.Sprintf("mongodb://%s:%s@%s:%s/?authSource=admin",
 		cfg.User, cfg.Password, cfg.Host, cfg.Port)
-	clientOptions := options.Client().ApplyURI(uri).SetTimeout(5 * time.Second)
+	clientOptions := options.Client().ApplyURI(uri)
 
 	if env != "prod" {
 		cmdMonitor := &event.CommandMonitor{
@@ -36,7 +36,13 @@ func connectToMongoDB(cfg *util.DBCfg, env string) (*DBServer, error) {
 		clientOptions = clientOptions.SetMonitor(cmdMonitor)
 	}
 
-	client, err := mongo.Connect(context.Background(), clientOptions)
+	client, err := mongo.NewClient(clientOptions)
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancelFunc := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelFunc()
+	err = client.Connect(ctx)
 	if err != nil {
 		return nil, err
 	}
